@@ -1,0 +1,156 @@
+---
+title: useEffect
+date: '2023-06-27'
+tags: ['react', 'useEffect', 'hooks']
+draft: false
+summary: useEffect is a React Hook that lets you synchronize a component with an external system.
+---
+
+`useEffect` is a React Hook that lets you synchronize a component with an external system.
+
+```jsx
+useEffect(setup, dependencies?)
+```
+
+[官方文档链接](https://react.dev/reference/react/useEffect)
+
+## 常见使用场景
+
+- A timer managed with `setInterval()` and `clearInterval()`.
+- An event subscription using `window.addEventListener()` and `window.removeEventListener()`.
+- A third-party animation library with an API like `animation.start()` and `animation.reset()`.
+
+## 基础用法
+
+```jsx
+useEffect(() => {
+  const connection = createConnection(serverUrl, roomId)
+  connection.connect()
+  return () => {
+    connection.disconnect()
+  }
+}, [roomId, serverUrl])
+```
+
+[更多](https://react.dev/reference/react/useEffect#examples-connecting)
+
+### 客制 Hook
+
+```jsx
+function useChatRoom({ serverUrl, roomId }) {
+  useEffect(() => {
+    const options = {
+      serverUrl: serverUrl,
+      roomId: roomId,
+    }
+    const connection = createConnection(options)
+    connection.connect()
+    return () => connection.disconnect()
+  }, [roomId, serverUrl])
+}
+```
+
+[更多](https://react.dev/reference/react/useEffect#examples-custom-hooks)
+
+## Fetching data with Effects
+
+```jsx
+import { useState, useEffect } from 'react'
+import { fetchBio } from './api.js'
+
+export default function Page() {
+  const [person, setPerson] = useState('Alice')
+  const [bio, setBio] = useState(null)
+  useEffect(() => {
+    let ignore = false
+    setBio(null)
+    fetchBio(person).then((result) => {
+      if (!ignore) {
+        setBio(result)
+      }
+    })
+    return () => {
+      ignore = true
+    }
+  }, [person])
+
+  return (
+    <>
+      <select value={person} onChange={(e) => setPerson(e.target.value)}>
+        <option value="Alice">Alice</option>
+        <option value="Bob">Bob</option>
+        <option value="Taylor">Taylor</option>
+      </select>
+      <hr />
+      <p>
+        <i>{bio ?? 'Loading...'}</i>
+      </p>
+    </>
+  )
+}
+```
+
+如果需要使用`useEffect`来 fetch data, 请务必使用上述示例的模式，详见 [race conditions](https://maxrozen.com/race-conditions-fetching-data-react-with-useeffect)
+
+## Dependencies
+
+对于 dependency 为空、empty array、不为空的示例详见 [Examples of passing reactive dependencies](https://maxrozen.com/race-conditions-fetching-data-react-with-useeffect)
+
+## Updating state based on previous state from an Effect
+
+```jsx
+useEffect(() => {
+  const intervalId = setInterval(() => {
+    setCount(count + 1)
+  }, 1000)
+  return () => clearInterval(intervalId)
+}, [count]) // Don't do this
+```
+
+```jsx
+useEffect(() => {
+  const intervalId = setInterval(() => {
+    setCount((c) => c + 1) // ✅ Pass a state updater
+  }, 1000)
+  return () => clearInterval(intervalId)
+}, []) // ✅ Now count is not a dependency
+```
+
+## useEffectEvent
+
+**实验中，了解即可**
+
+此 hook 应用于不希望 useEffect 代码中实际需要的一部分依赖触发 useEffect
+
+```jsx
+function Page({ url, shoppingCart }) {
+  const onVisit = useEffectEvent((visitedUrl) => {
+    logVisit(visitedUrl, shoppingCart.length)
+  })
+
+  useEffect(() => {
+    onVisit(url)
+  }, [url]) // ✅ All dependencies declared
+  // ...
+}
+```
+
+## Displaying different content on the server and the client
+
+**不推荐使用，如确实需要有条件性的显示不同 CSS**
+
+```jsx
+function MyComponent() {
+  const [didMount, setDidMount] = useState(false)
+
+  useEffect(() => {
+    setDidMount(true)
+  }, [])
+
+  if (didMount) {
+    // ... return client-only JSX ...
+  } else {
+    // ... return initial JSX ...
+  }
+}
+```

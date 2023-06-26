@@ -1,0 +1,28 @@
+---
+title: <StrictMode>
+date: '2023-06-27'
+tags: ['react', 'StrictMode', 'component']
+draft: false
+summary: <StrictMode> lets you find common bugs in your components early during development.
+---
+
+`<StrictMode>` lets you find common bugs in your components early during development.
+
+```jsx
+<StrictMode>
+  <App />
+</StrictMode>
+```
+
+[官方文档链接](https://react.dev/reference/react/StrictMode)
+
+## 会运行两次的 function
+
+- Your component function body (only top-level logic, so this doesn’t include code inside event handlers)
+- Functions that you pass to `useState`, `set` functions, `useMemo`, or `useReducer`
+- Some class component methods like `constructor`, `render`, `shouldComponentUpdate` ([see the whole list](https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects))
+- useEffect
+
+**用就完了**
+
+[Fixing deprecation warnings enabled by Strict Mode](https://react.dev/reference/react/StrictMode#fixing-deprecation-warnings-enabled-by-strict-mode)

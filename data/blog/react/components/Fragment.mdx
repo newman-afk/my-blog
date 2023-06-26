@@ -1,0 +1,20 @@
+---
+title: <Fragment> (<>...</>)
+date: '2023-06-27'
+tags: ['react', 'Fragment', 'component']
+draft: false
+summary: <Fragment>, often used via <>...</> syntax, lets you group elements without a wrapper node.
+---
+
+`<Fragment>`, often used via `<>...</>` syntax, lets you group elements without a wrapper node.
+
+```jsx
+<>
+  <OneChild />
+  <AnotherChild />
+</>
+```
+
+[官方文档链接](https://react.dev/reference/react/Fragment)
+
+唯一要点：If you want to pass `key` to a Fragment, you can’t use the `<>...</>` syntax. You have to explicitly `import Fragment from 'react'` and render `<Fragment key={yourKey}>...</Fragment>`.
