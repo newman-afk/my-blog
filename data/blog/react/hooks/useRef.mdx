@@ -1,0 +1,104 @@
+---
+title: useRef
+date: '2023-06-26'
+tags: ['react', 'useRef', 'hooks']
+draft: false
+summary: useRef is a React Hook that lets you reference a value that’s not needed for rendering.
+---
+
+`useRef` is a React Hook that lets you reference a value that’s not needed for rendering.
+
+```jsx
+const ref = useRef(initialValue)
+```
+
+[官方文档链接](https://react.dev/reference/react/useRef)
+
+## Pitfall
+
+Do not write or read ref.current during rendering.
+
+React expects that the body of your component behaves like a pure function:
+
+- If the inputs (props, state, and context) are the same, it should return exactly the same JSX.
+- Calling it in a different order or with different arguments should not affect the results of other calls.
+
+Reading or writing a ref during rendering breaks these expectations.
+
+```jsx
+function MyComponent() {
+  // ...
+  // 🚩 Don't write a ref during rendering
+  myRef.current = 123
+  // ...
+  // 🚩 Don't read a ref during rendering
+  return <h1>{myOtherRef.current}</h1>
+}
+```
+
+You can read or write refs from event handlers or effects instead.
+
+```jsx
+function MyComponent() {
+  // ...
+  useEffect(() => {
+    // ✅ You can read or write refs in effects
+    myRef.current = 123
+  })
+  // ...
+  function handleClick() {
+    // ✅ You can read or write refs in event handlers
+    doSomething(myOtherRef.current)
+  }
+  // ...
+}
+```
+
+If you have to read or write something during rendering, use state instead.
+
+When you break these rules, your component might still work, but most of the newer features we’re adding to React will rely on these expectations. Read more about keeping your components pure.
+
+## Avoiding recreating the ref contents
+
+React saves the initial ref value once and ignores it on the next renders.
+
+```jsx
+function Video() {
+  const playerRef = useRef(new VideoPlayer())
+  // ...
+}
+```
+
+Although the result of `new VideoPlayer()` is only used for the initial render, you’re still calling this function on every render. This can be wasteful if it’s creating expensive objects.
+
+To solve it, you may initialize the ref like this instead:
+
+```jsx
+function Video() {
+  const playerRef = useRef(null)
+  if (playerRef.current === null) {
+    playerRef.current = new VideoPlayer()
+  }
+  // ...
+}
+```
+
+Normally, writing or reading `ref.current` during render is not allowed. However, it’s fine in this case because the result is always the same, and the condition only executes during initialization so it’s fully predictable.
+
+## 对客制组件添加Ref
+
+```jsx
+import { forwardRef } from 'react';
+
+const MyInput = forwardRef(({ value, onChange }, ref) => {
+  return (
+    <input
+      value={value}
+      onChange={onChange}
+      ref={ref}
+    />
+  );
+});
+
+export default MyInput;
+```

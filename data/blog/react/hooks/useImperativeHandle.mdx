@@ -1,0 +1,39 @@
+---
+title: useImperativeHandle
+date: '2023-06-26'
+tags: ['react', 'useImperativeHandle', 'hooks']
+draft: false
+summary: useRef is a React Hook that lets you reference a value that’s not needed for rendering.
+---
+
+`useImperativeHandle` is a React Hook that lets you customize the handle exposed as a ref.
+
+```jsx
+useImperativeHandle(ref, createHandle, dependencies?)
+```
+
+[官方文档链接](https://react.dev/reference/react/useImperativeHandle)
+
+## 用法
+
+```jsx
+import { forwardRef, useRef, useImperativeHandle } from 'react'
+
+const MyInput = forwardRef(function MyInput(props, ref) {
+  const inputRef = useRef(null)
+
+  useImperativeHandle(ref, () => {
+    return {
+      focus() {
+        inputRef.current.focus()
+      },
+      scrollIntoView() {
+        inputRef.current.scrollIntoView()
+      }
+    }
+  }, [])
+
+  return <input {...props} ref={inputRef} />
+})
+```
+**能不用就不用**
