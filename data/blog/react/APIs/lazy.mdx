@@ -1,0 +1,75 @@
+---
+title: lazy
+date: '2023-06-27'
+tags: ['react', 'lazy', 'apis']
+draft: false
+summary: lazy lets you defer loading component’s code until it is rendered for the first time.
+---
+
+`lazy` lets you defer loading component’s code until it is rendered for the first time.
+
+```jsx
+const SomeComponent = lazy(load)
+```
+
+[官方文档链接](https://react.dev/reference/react/lazy)
+
+## 示例
+
+lazy 用于懒加载文件(Code Splitting)
+
+```jsx:App.jsx
+import { useState, Suspense, lazy } from 'react';
+import Loading from './Loading.jsx';
+
+const MarkdownPreview = lazy(() => delayForDemo(import('./MarkdownPreview.jsx')));
+
+export default function MarkdownEditor() {
+  const [showPreview, setShowPreview] = useState(false);
+  const [markdown, setMarkdown] = useState('Hello, **world**!');
+  return (
+    <>
+      <textarea value={markdown} onChange={e => setMarkdown(e.target.value)} />
+      <label>
+        <input type="checkbox" checked={showPreview} onChange={e => setShowPreview(e.target.checked)} />
+        Show preview
+      </label>
+      <hr />
+      {showPreview && (
+        <Suspense fallback={<Loading />}>
+          <h2>Preview</h2>
+          <MarkdownPreview markdown={markdown} />
+        </Suspense>
+      )}
+    </>
+  );
+}
+
+// Add a fixed delay so you can see the loading state
+function delayForDemo(promise) {
+  return new Promise(resolve => {
+    setTimeout(resolve, 2000);
+  }).then(() => promise);
+}
+```
+
+```jsx:Loading.jsx
+export default function Loading() {
+  return <p><i>Loading...</i></p>;
+}
+```
+
+```jsx:MarkdownPreview.jsx
+import { Remarkable } from 'remarkable';
+
+const md = new Remarkable();
+
+export default function MarkdownPreview({ markdown }) {
+  return (
+    <div
+      className="content"
+      dangerouslySetInnerHTML={{__html: md.render(markdown)}}
+    />
+  );
+}
+```
