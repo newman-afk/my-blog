@@ -1,0 +1,39 @@
+---
+title: useTransition
+date: '2023-06-27'
+tags: ['react', 'useTransition', 'hooks']
+draft: false
+summary: useTransition is a React Hook that lets you update the state without blocking the UI.
+---
+
+`useTransition` is a React Hook that lets you update the state without blocking the UI.
+
+```jsx
+const [isPending, startTransition] = useTransition()
+```
+
+[官方文档链接](https://react.dev/reference/react/useTransition)
+
+## Caveats
+
+- `useTransition` is a Hook, so it can only be called inside components or custom Hooks. If you need to start a transition somewhere else (for example, from a data library), call the standalone `startTransition` instead.
+- The function you pass to `startTransition` must be `synchronous`.
+
+startTransition 引发更多次渲染，请只在必要时使用。
+
+## 错误示范
+
+You can’t use a transition for a state variable that controls an input:
+
+```jsx
+const [text, setText] = useState('')
+// ...
+function handleChange(e) {
+  // ❌ Can't use transitions for controlled input state
+  startTransition(() => {
+    setText(e.target.value)
+  })
+}
+// ...
+return <input value={text} onChange={handleChange} />
+```

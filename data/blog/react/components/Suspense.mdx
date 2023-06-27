@@ -15,3 +15,27 @@ summary: <Suspense> lets you display a fallback until its children have finished
 ```
 
 [官方文档链接](https://react.dev/reference/react/Suspense)
+
+## 适用场景
+
+- Data fetching with Suspense-enabled frameworks like `Relay` and `Next.js`
+- Lazy-loading component code with `lazy`
+- State management packages such as `Redux`、`SWR`、`React Query` etc.
+
+Suspense 处理 fetch data 尚不支持在 React 中使用, 如果一定要，请使用上述所示的状态管理工具，具体操作见其文档(均不推荐且如使用须自行确保兼容性)，并确保配合使用[react-error-boundary](https://github.com/bvaughn/react-error-boundary)
+
+## 进阶
+
+如果希望 fallback 只在最初加载时显示，可以使用 `useDeferredValue` 、 `useTransition`或`startTransition`, 注意，`startTransition` 可视为 `useTransition` 的一部分，但 `startTransition` 可在 `function component` 之外使用.
+
+官方描述：Both deferred values and transitions let you avoid showing Suspense fallback in favor of inline indicators. Transitions mark the whole update as non-urgent so they are typically used by frameworks and router libraries for navigation. Deferred values, on the other hand, are mostly useful in application code where you want to mark a part of UI as non-urgent and let it “lag behind” the rest of the UI.
+
+## Resetting Suspense boundaries on navigation
+
+注意：Suspense-enabled routers are expected to wrap the navigation updates into transitions by default.
+
+During a transition, React will avoid hiding already revealed content. However, if you navigate to a route with different parameters, you might want to tell React it is different content. You can express this with a `key`:
+
+```jsx
+<ProfilePage key={queryParams.id} />
+```

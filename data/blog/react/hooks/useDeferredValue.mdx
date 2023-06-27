@@ -1,0 +1,98 @@
+---
+title: useDeferredValue
+date: '2023-06-27'
+tags: ['react', 'useDeferredValue', 'hooks']
+draft: false
+summary: useDeferredValue is a React Hook that lets you defer updating a part of the UI.
+---
+
+`useDeferredValue` is a React Hook that lets you defer updating a part of the UI.
+
+```jsx
+const deferredValue = useDeferredValue(value)
+```
+
+[官方文档链接](https://react.dev/reference/react/useDeferredValue)
+
+## 适用场景
+
+- Data fetching with Suspense-enabled frameworks like `Relay` and `Next.js`
+- Lazy-loading component code with `lazy`
+
+## 使用案例 1
+
+```jsx
+import { Suspense, useState } from 'react'
+import SearchResults from './SearchResults.js'
+
+export default function App() {
+  const [query, setQuery] = useState('')
+  const deferredQuery = useDeferredValue(query)
+  return (
+    <>
+      <label>
+        Search albums:
+        <input value={query} onChange={(e) => setQuery(e.target.value)} />
+      </label>
+      <Suspense fallback={<h2>Loading...</h2>}>
+        <SearchResults query={deferredQuery} />
+      </Suspense>
+    </>
+  )
+}
+```
+
+## 使用案例 2
+
+```jsx:App.jsx
+import { useState, useDeferredValue } from 'react';
+import SlowList from './SlowList.js';
+
+export default function App() {
+  const [text, setText] = useState('');
+  const deferredText = useDeferredValue(text);
+  return (
+    <>
+      <input value={text} onChange={e => setText(e.target.value)} />
+      <SlowList text={deferredText} />
+    </>
+  );
+}
+```
+
+```jsx:SlowList.jsx
+import { memo } from 'react';
+
+const SlowList = memo(function SlowList({ text }) {
+  // Log once. The actual slowdown is inside SlowItem.
+  console.log('[ARTIFICIALLY SLOW] Rendering 250 <SlowItem />');
+
+  let items = [];
+  for (let i = 0; i < 250; i++) {
+    items.push(<SlowItem key={i} text={text} />);
+  }
+  return (
+    <ul className="items">
+      {items}
+    </ul>
+  );
+});
+
+function SlowItem({ text }) {
+  let startTime = performance.now();
+  while (performance.now() - startTime < 1) {
+    // Do nothing for 1 ms per item to emulate extremely slow code
+  }
+
+  return (
+    <li className="item">
+      Text: {text}
+    </li>
+  )
+}
+export default SlowList;
+```
+
+This optimization requires `SlowList` to be wrapped in `memo`. This is because whenever the `text` changes, React needs to be able to re-render the parent component quickly. During that re-render, `deferredText` still has its previous value, so `SlowList` is able to skip re-rendering (its props have not changed). Without `memo`, it would have to re-render anyway, defeating the point of the optimization.
+
+[How is deferring a value different from debouncing and throttling?](https://react.dev/reference/react/useDeferredValue#how-is-deferring-a-value-different-from-debouncing-and-throttling)
