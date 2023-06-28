@@ -1,0 +1,138 @@
+---
+title: useReducer
+date: '2023-06-29'
+tags: ['react', 'useReducer', 'hooks']
+draft: false
+summary: useReducer is a React Hook that lets you add a reducer to your component.
+---
+
+`useReducer` is a React Hook that lets you add a reducer to your component.
+
+```jsx
+const [state, dispatch] = useReducer(reducer, initialArg, init?)
+```
+
+[官方文档链接](https://react.dev/reference/react/useReducer)
+
+## 代码演示
+
+```jsx:todosReducer.jsx
+export const TODOSACTIONS = {
+  ADD_TODO: 'add-todo',
+  TOGGLE_TODO: 'toggle-todo',
+  DELETE_TODO: 'delete-todo',
+}
+
+function createNewTodo(todo) {
+  return {
+    id: Date.now(),
+    content: todo,
+    complete: false,
+  }
+}
+
+export default function todosReducer(todos, action) {
+  switch (action.type) {
+    case TODOSACTIONS.ADD_TODO: {
+      return [...todos, createNewTodo(action.payload.newTodo)]
+    }
+    case TODOSACTIONS.TOGGLE_TODO: {
+      return todos.map((todo) => {
+        if (todo.id === action.payload.id) {
+          return { ...todo, complete: !todo.complete }
+        }
+
+        return todo
+      })
+    }
+    case TODOSACTIONS.DELETE_TODO: {
+      return todos.filter((todo) => todo.id !== action.payload.id)
+    }
+  }
+  throw Error('Unknown action: ' + action.type)
+}
+```
+
+```jsx:App.jsx
+import { useReducer, useRef } from "react"
+import "./App.css"
+import todosReducer from "./todosReducer"
+import { TODOSACTIONS } from "./todosReducer"
+
+function App() {
+  const [todos, dispatch] = useReducer(todosReducer, [])
+  const newTodoRef = useRef("")
+
+  function handleSubmit(e) {
+    e.preventDefault()
+    dispatch({
+      type: TODOSACTIONS.ADD_TODO,
+      payload: { newTodo: newTodoRef.current.value },
+    })
+
+    newTodoRef.current.value = ""
+  }
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <input type='text' ref={newTodoRef} />
+        <button type='submit'>ADD TODO</button>
+      </form>
+
+      {todos.map((todo) => {
+        return (
+          <div key={todo.id}>
+            <span className={`${todo.complete && "completed"}`}>
+              {todo.content}
+            </span>
+            <button
+              onClick={() =>
+                dispatch({
+                  type: TODOSACTIONS.TOGGLE_TODO,
+                  payload: { id: todo.id },
+                })
+              }
+            >
+              toggle
+            </button>
+            <button
+              onClick={() =>
+                dispatch({
+                  type: TODOSACTIONS.DELETE_TODO,
+                  payload: { id: todo.id },
+                })
+              }
+            >
+              delete
+            </button>
+          </div>
+        )
+      })}
+    </>
+  )
+}
+
+export default App
+```
+
+```css:App.css
+.completed {
+  text-decoration-line: line-through;
+}
+```
+
+## 初始数据需要使用 function 时
+
+```jsx
+function createInitialState(username) {
+  // ...
+}
+
+function TodoList({ username }) {
+  const [state, dispatch] = useReducer(reducer, username, createInitialState)
+  // ...
+}
+```
+
+请注意不要写成`const [state, dispatch] = useReducer(reducer, createInitialState(username))`的形式，如果该 `function` 没有参数，则 `useReducer` 的第二个参数可为 `null`.
