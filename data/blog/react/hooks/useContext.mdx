@@ -1,0 +1,71 @@
+---
+title: useContext
+date: '2023-06-28'
+tags: ['react', 'useContext', 'hooks']
+draft: false
+summary: useContext is a React Hook that lets you read and subscribe to context from your component.
+---
+
+`useContext` is a React Hook that lets you read and subscribe to context from your component.
+
+```jsx
+const value = useContext(SomeContext)
+```
+
+[官方文档链接](https://react.dev/reference/react/useContext)
+
+## 代码演示
+
+### 创建 Context
+
+```jsx:exampleContext.jsx
+import { createContext, useState } from 'react'
+
+const ExampleContext = createContext()
+
+export function ExampleProvider({ children }) {
+  const [theme, setTheme] = useState('light')
+  return <ExampleContext.Provider value={{ theme, setTheme }}>{children}</ExampleContext.Provider>
+}
+
+export default ExampleContext
+```
+
+```jsx:main.jsx
+import React from "react"
+import ReactDOM from "react-dom/client"
+import App from "./App.jsx"
+import { ExampleProvider } from "./exampleContext.jsx"
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <ExampleProvider>
+      <App />
+    </ExampleProvider>
+  </React.StrictMode>
+)
+```
+
+```jsx:App.jsx
+import { useContext } from "react"
+import ExampleContext from "./exampleContext"
+
+function App() {
+  const { theme, setTheme } = useContext(ExampleContext)
+
+  return (
+    <>
+      <h1>Theme: {theme}</h1>
+      <button
+        onClick={() =>
+          setTheme((oldTheme) => (oldTheme === "light" ? "black" : "light"))
+        }
+      >
+        swap theme
+      </button>
+    </>
+  )
+}
+
+export default App
+```
