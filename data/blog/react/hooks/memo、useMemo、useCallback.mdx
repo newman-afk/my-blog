@@ -1,0 +1,70 @@
+---
+title: memo、useMemo、useCallback
+date: '2023-06-29'
+tags: ['react', 'memo', 'useMemo', 'useCallback', 'hooks', 'apis']
+draft: false
+summary: memo lets you skip re-rendering a component when its props are unchanged; useMemo is a React Hook that lets you cache the result of a calculation between re-renders; useCallback is a React Hook that lets you cache a function definition between re-renders.
+---
+
+- `memo` lets you skip re-rendering a component when its props are unchanged.
+- `useMemo` is a React Hook that lets you cache the result of a calculation between re-renders
+- `useCallback` is a React Hook that lets you cache a function definition between re-renders.
+
+```jsx
+const MemoizedComponent = memo(SomeComponent, arePropsEqual?)
+const cachedValue = useMemo(calculateValue, dependencies)
+const cachedFn = useCallback(fn, dependencies)
+```
+
+[memo 官方文档链接](https://react.dev/reference/react/memo)
+
+[useMemo 官方文档链接](https://react.dev/reference/react/useMemo)
+
+[useCallback 官方文档链接](https://react.dev/reference/react/useCallback)
+
+**三者都会增加缓存负担，请只在必要时使用。**
+
+**memoization is a performance optimization, not a guarantee.**
+
+The only benefit to `useCallback` is that it lets you avoid writing an extra nested function inside. It doesn’t do anything else. [官方解释链接](https://react.dev/reference/react/useMemo#memoizing-a-function)
+
+`useCallback(fn, dependencies)` = `useMemo(() => fn, dependencies)`
+
+`memo` 可用于缓存 component，The component won't change if it's props, state, and context haven’t changed. 使用案例：
+
+```jsx
+const Greeting = memo(function Greeting({ name }) {
+  return <h1>Hello, {name}!</h1>
+})
+
+export default Greeting
+```
+
+`useMemo` `calculateValue`，不可以有参数. 使用案例：
+
+```jsx
+function Dropdown({ allItems, text }) {
+  const visibleItems = useMemo(() => {
+    const searchOptions = { matchMode: 'whole-word', text }
+    return searchItems(allItems, searchOptions)
+  }, [allItems, text])
+}
+```
+
+如上所述，useCallback 与 useMemo 并无本质区别，使用案例：
+
+```jsx
+export default function Page({ productId, referrer }) {
+  const handleSubmit = useCallback(
+    (orderDetails) => {
+      post('/product/' + productId + '/buy', {
+        referrer,
+        orderDetails,
+      })
+    },
+    [productId, referrer]
+  )
+
+  return <Form onSubmit={handleSubmit} />
+}
+```
