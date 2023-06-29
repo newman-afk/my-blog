@@ -1,0 +1,17 @@
+---
+title: useDebugValue
+date: '2023-06-29'
+tags: ['react', 'useDebugValue', 'hooks']
+draft: false
+summary: useDebugValue is a React Hook that lets you add a label to a custom Hook in React DevTools.
+---
+
+`useDebugValue` is a React Hook that lets you add a label to a custom Hook in `React DevTools`.
+
+```jsx
+useDebugValue(value, format?)
+```
+
+[官方文档链接](https://react.dev/reference/react/useDebugValue)
+
+`useDebugValue`仅工作于 custom hook 内, `value`为`React DevTools`中显示的内容，如果需要进行耗时的计算，使用`format`, `format`仅在`React DevTools`打开时运行。

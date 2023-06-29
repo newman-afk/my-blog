@@ -1,0 +1,17 @@
+---
+title: useInsertionEffect
+date: '2023-06-29'
+tags: ['react', 'useInsertionEffect', 'hooks']
+draft: false
+summary: useInsertionEffect is a version of useEffect that fires before any DOM mutations.
+---
+
+`useInsertionEffect` is for CSS-in-JS library authors. Unless you are working on a CSS-in-JS library and need a place to inject the styles, you probably want `useEffect` or `useLayoutEffect` instead.
+
+`useInsertionEffect` is a version of `useEffect` that fires before any DOM mutations.
+
+```jsx
+useInsertionEffect(setup, dependencies?)
+```
+
+[官方文档链接](https://react.dev/reference/react/useInsertionEffect)

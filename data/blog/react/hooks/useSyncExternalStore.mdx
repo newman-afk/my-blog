@@ -1,0 +1,19 @@
+---
+title: useSyncExternalStore
+date: '2023-06-29'
+tags: ['react', 'useSyncExternalStore', 'hooks']
+draft: false
+summary: useSyncExternalStore is a React Hook that lets you subscribe to an external store.
+---
+
+`useSyncExternalStore` is a React Hook that lets you subscribe to an external store.
+
+```jsx
+const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot?)
+```
+
+[官方文档链接](https://react.dev/reference/react/useSyncExternalStore)
+
+## Note
+
+When possible, we recommend using built-in React state with `useState` and `useReducer` instead. The `useSyncExternalStore` API is mostly useful if you need to integrate with existing non-React code.
