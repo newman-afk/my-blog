@@ -1,0 +1,28 @@
+---
+title: flushSync
+date: '2023-06-29'
+tags: ['react-dom', 'flushSync', 'apis']
+draft: false
+summary: flushSync lets you force React to flush any updates inside the provided callback synchronously. This ensures that the DOM is updated immediately.
+---
+
+`flushSync` lets you force React to flush any updates inside the provided callback synchronously. This ensures that the DOM is updated immediately.
+
+```jsx
+flushSync(callback)
+```
+
+[官方文档链接](https://react.dev/reference/react-dom/flushSync)
+
+别用就是了
+
+## Flushing updates for third-party integrations
+
+When integrating with third-party code such as browser APIs or UI libraries, it may be necessary to force React to flush updates. Use `flushSync` to force React to flush any `state updates` inside the callback synchronously:
+
+```jsx
+flushSync(() => {
+  setSomething(123)
+})
+// By this line, the DOM is updated.
+```

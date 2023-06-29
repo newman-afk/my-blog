@@ -1,0 +1,20 @@
+---
+title: createPortal
+date: '2023-06-29'
+tags: ['react-dom', 'createPortal', 'apis']
+draft: false
+summary: createPortal lets you render some children into a different part of the DOM.
+---
+
+`createPortal` lets you render some children into a different part of the DOM.
+
+```jsx
+<div>
+  <SomeComponent />
+  {createPortal(children, domNode, key?)}
+</div>
+```
+
+[官方文档链接](https://react.dev/reference/react-dom/createPortal)
+
+`createPortal`用于创建`modal`或与非 react 项目配合
