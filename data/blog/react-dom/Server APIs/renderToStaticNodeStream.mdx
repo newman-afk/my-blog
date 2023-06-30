@@ -1,0 +1,29 @@
+---
+title: renderToStaticNodeStream
+date: '2023-06-30'
+tags: ['react-dom', 'renderToStaticNodeStream', 'server-apis']
+draft: false
+summary: renderToStaticNodeStream renders a non-interactive React tree to a Node.js Readable Stream.
+---
+
+`renderToStaticNodeStream` renders a non-interactive React tree to a Node.js Readable Stream.
+
+```jsx
+const stream = renderToStaticNodeStream(reactNode)
+```
+
+[官方文档链接](https://react.dev/reference/react-dom/server/renderToStaticNodeStream)
+
+## 用法
+
+```jsx
+import { renderToStaticNodeStream } from 'react-dom/server'
+
+// The route handler syntax depends on your backend framework
+app.use('/', (request, response) => {
+  const stream = renderToStaticNodeStream(<Page />)
+  stream.pipe(response)
+})
+```
+
+还是那句话，直接使用基于 React 的框架更好

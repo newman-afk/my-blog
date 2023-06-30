@@ -1,0 +1,30 @@
+---
+title: renderToString
+date: '2023-06-30'
+tags: ['react-dom', 'renderToString', 'server-apis']
+draft: false
+summary: renderToString renders a React tree to an HTML string.
+---
+
+`renderToString` renders a React tree to an HTML string.
+
+```jsx
+const html = renderToString(reactNode)
+```
+
+[官方文档链接](https://react.dev/reference/react-dom/server/renderToString)
+
+## Pitfall
+
+`renderToString` does not support streaming or waiting for data.
+
+`renderToString` returns a string immediately, so it does not support streaming or waiting for data.
+
+When possible, we recommend using these fully-featured alternatives:
+
+- If you use Node.js, use `renderToPipeableStream`.
+- If you use Deno or a modern edge runtime with `Web Streams`, use `renderToReadableStream`.
+
+You can continue using `renderToString` if your server environment does not support streams.
+
+还是那句话，直接使用基于 React 的框架更方便简单

@@ -1,0 +1,29 @@
+---
+title: renderToStaticMarkup
+date: '2023-06-30'
+tags: ['react-dom', 'renderToStaticMarkup', 'server-apis']
+draft: false
+summary: renderToStaticMarkup renders a non-interactive React tree to an HTML string.
+---
+
+`renderToStaticMarkup` renders a non-interactive React tree to an HTML string.
+
+```jsx
+const html = renderToStaticMarkup(reactNode)
+```
+
+[官方文档链接](https://react.dev/reference/react-dom/server/renderToStaticMarkup)
+
+## 用法
+
+```jsx
+import { renderToStaticMarkup } from 'react-dom/server'
+
+// The route handler syntax depends on your backend framework
+app.use('/', (request, response) => {
+  const html = renderToStaticMarkup(<Page />)
+  response.send(html)
+})
+```
+
+纯静态网站用这个，但是还是用基于 React 的框架更好

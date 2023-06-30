@@ -1,0 +1,38 @@
+---
+title: renderToPipeableStream
+date: '2023-06-30'
+tags: ['react-dom', 'renderToPipeableStream', 'server-apis']
+draft: false
+summary: renderToPipeableStream renders a React tree to a pipeable Node.js Stream.
+---
+
+`renderToPipeableStream` renders a React tree to a pipeable `Node.js Stream`.
+
+```jsx
+const { pipe, abort } = renderToPipeableStream(reactNode, options?)
+```
+
+[官方文档链接](https://react.dev/reference/react-dom/server/renderToPipeableStream)
+
+## Note
+
+This API is specific to Node.js. Environments with `Web Streams`, like Deno and modern edge runtimes, should use `renderToReadableStream` instead.
+
+## 用法
+
+```jsx
+import { renderToPipeableStream } from 'react-dom/server'
+
+// The route handler syntax depends on your backend framework
+app.use('/', (request, response) => {
+  const { pipe } = renderToPipeableStream(<App />, {
+    bootstrapScripts: ['/main.js'],
+    onShellReady() {
+      response.setHeader('content-type', 'text/html')
+      pipe(response)
+    },
+  })
+})
+```
+
+呃···，直接用基于 React 的框架好了

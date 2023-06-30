@@ -1,0 +1,36 @@
+---
+title: renderToReadableStream
+date: '2023-06-30'
+tags: ['react-dom', 'renderToReadableStream', 'server-apis']
+draft: false
+summary: renderToReadableStream renders a React tree to a Readable Web Stream.
+---
+
+`renderToReadableStream` renders a React tree to a `Readable Web Stream`.
+
+```jsx
+const stream = await renderToReadableStream(reactNode, options?)
+```
+
+[官方文档链接](https://react.dev/reference/react-dom/server/renderToReadableStream)
+
+## Note
+
+This API depends on `Web Streams`. For Node.js, use `renderToPipeableStream` instead.
+
+## 用法
+
+```jsx
+import { renderToReadableStream } from 'react-dom/server'
+
+async function handler(request) {
+  const stream = await renderToReadableStream(<App />, {
+    bootstrapScripts: ['/main.js'],
+  })
+  return new Response(stream, {
+    headers: { 'content-type': 'text/html' },
+  })
+}
+```
+
+呃···，直接用基于 React 的框架好了
