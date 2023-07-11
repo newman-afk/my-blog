@@ -1,0 +1,216 @@
+---
+title: Themes
+date: '2023-07-12'
+tags: ['themes', 'css', 'javascript', 'react']
+draft: false
+summary: Themes with dark、light、and devices that made with javascript and react.
+---
+
+# Themes
+
+Themes with `dark`、`light`、and `devices` that made with `javascript` and `react`.
+
+## Css only
+
+```css
+@media (prefers-color-scheme: light) {
+  body {
+    background: #fff;
+    color: #333;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #333;
+    color: #fff;
+  }
+}
+```
+
+## Javascript
+
+There have no code with `HTML` and `Css`, but you should konw what to do.
+
+```javascript:script.js
+const themeButtons = document.querySelectorAll('.theme-btn')
+
+if (!('theme' in localStorage)) setThemeByDevice()
+
+if (localStorage.theme === 'dark') document.documentElement.classList.add('dark')
+
+if (localStorage.theme === 'light') document.documentElement.classList.remove('dark')
+
+themeButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    switch (button.id) {
+      case 'light':
+        setThemeToLight()
+        break
+      case 'dark':
+        setThemeToDark()
+        break
+      case 'device':
+        setThemeByDevice()
+        break
+      default:
+        break
+    }
+
+    setActiveThemeBtn()
+  })
+})
+
+function setThemeToLight() {
+  document.documentElement.classList.remove('dark')
+  localStorage.theme = 'light'
+}
+
+function setThemeToDark() {
+  document.documentElement.classList.add('dark')
+  localStorage.theme = 'dark'
+}
+
+function setThemeByDevice() {
+  localStorage.removeItem('theme')
+  const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)')
+
+  if (darkThemeMq.matches) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+
+  darkThemeMq.addEventListener('change', (e) => {
+    if ('theme' in localStorage) return
+
+    if (e.matches) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  })
+}
+
+function setActiveThemeBtn() {
+  themeButtons.forEach((btn) => {
+    btn.classList.remove('active')
+
+    if (btn.id === 'device' && !('theme' in localStorage)) btn.classList.add('active')
+
+    if (btn.id === 'dark' && localStorage.theme === 'dark') btn.classList.add('active')
+
+    if (btn.id === 'light' && localStorage.theme === 'light') btn.classList.add('active')
+  })
+}
+
+setActiveThemeBtn()
+```
+
+## React
+
+```jsx:useThemeDetector.jsx
+import { useEffect, useState } from "react"
+
+const useThemeDetector = () => {
+  const getCurrentTheme = () =>
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  const [isDarkTheme, setIsDarkTheme] = useState(getCurrentTheme())
+  const mqListener = (e) => {
+    setIsDarkTheme(e.matches)
+  }
+
+  useEffect(() => {
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)")
+    darkThemeMq.addEventListener("change", mqListener)
+    return () => darkThemeMq.removeEventListener("change", mqListener)
+  }, [])
+  return isDarkTheme
+}
+
+export default useThemeDetector
+
+```
+
+```jsx:ThemeContext.jsx
+/* eslint-disable react/prop-types */
+
+import { createContext, useEffect, useState } from "react"
+import useThemeDetector from "./useThemeDetector"
+
+const ThemeContext = createContext("dark")
+
+export function ThemeProvider({ children }) {
+  const isDarkTheme = useThemeDetector()
+  const deviceTheme = isDarkTheme === true ? "dark" : "light"
+
+  const [usingDeviceThemes, setUsingDeviceThemes] = useState(
+    !("theme" in localStorage)
+  )
+  const [theme, setTheme] = useState(localStorage.theme)
+
+  if (theme === "dark") {
+    document.documentElement.classList.add("dark")
+  } else {
+    document.documentElement.classList.remove("dark")
+  }
+
+  useEffect(() => {
+    if (usingDeviceThemes) {
+      setTheme(deviceTheme)
+    }
+  }, [usingDeviceThemes, deviceTheme])
+  return (
+    <ThemeContext.Provider
+      value={{ theme, setTheme, setUsingDeviceThemes }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
+export default ThemeContext
+```
+
+```jsx:ThemeBtns.jsx
+import { useContext } from "react"
+import ThemeContext from "./ThemeContext"
+
+function ThemeBtns() {
+  const { setTheme, setUsingDeviceThemes } = useContext(ThemeContext)
+
+  return (
+    <div>
+      <button
+        onClick={() => {
+          setTheme("light")
+          localStorage.theme = "light"
+          setUsingDeviceThemes(false)
+        }}
+      >
+        light
+      </button>
+      <button
+        onClick={() => {
+          setTheme("dark")
+          localStorage.theme = "dark"
+          setUsingDeviceThemes(false)
+        }}
+      >
+        dark
+      </button>
+      <button
+        onClick={() => {
+          setUsingDeviceThemes(true)
+          localStorage.removeItem("theme")
+        }}
+      >
+        device
+      </button>
+    </div>
+  )
+}
+
+export default ThemeBtns
+```
+
+**Keep in mind that you don't really need to make a theme context**
