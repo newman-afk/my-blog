@@ -1,0 +1,97 @@
+---
+title: Express methods
+date: '2023-07-16'
+tags: ['express', 'methods']
+draft: false
+summary: 'express methods'
+---
+
+# Express methods
+
+## express.json()
+
+当需要处理`JSON`文件时使用, 基于`body-parser`
+
+```js
+const express = require('express')
+const app = express()
+
+app.use(express.json())
+```
+
+## express.raw()
+
+需要处理`buffer`时使用，同样基于`body-parser`，但与`express.json()`同时使用会引发冲突，但在你需要使用它的时候就应该直到该怎么做了。
+
+```js
+const express = require('express')
+const app = express()
+
+app.use(express.raw())
+```
+
+## express.Router()
+
+```js
+const express = require('express')
+const app = express()
+
+const indexRouter = express.Router()
+indexRouter.get().post() //etc
+indexRouter.route('/example').get() //etc
+
+app.use('/', indexRouter)
+```
+
+## express.static()
+
+一般只是将 `express` 作为后端处理 `api`，并不真的需要这个。
+
+```js
+const express = require('express')
+const path = require('path')
+const app = express()
+
+app.use(express.static(path.join(__dirname, 'public')))
+```
+
+## express.text()
+
+将`body`转化为`string`类型
+
+```js
+const express = require('express')
+const app = express()
+
+app.use(express.text())
+```
+
+## express.urlencoded()
+
+如果需要处理`form`表单，那么需要这个
+
+```js
+const express = require('express')
+const app = express()
+
+app.use(express.urlencoded())
+```
+
+## 常规配置
+
+```js
+const express = require('express')
+const path = require('path')
+
+// var indexRouter = require("./routes/index")
+// var usersRouter = require("./routes/users")
+
+const app = express()
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.static(path.join(__dirname, 'public')))
+
+// app.use('/', indexRouter)
+// app.use('/users',usersRouter)
+```
