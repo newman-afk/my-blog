@@ -1,0 +1,289 @@
+---
+title: Express Application
+date: '2023-07-16'
+tags: ['express', 'application']
+draft: false
+summary: 'express methods'
+---
+
+# Application
+
+`基本配置`
+
+```js
+const express = require('express')
+const app = express()
+
+app.get('/', function (req, res) {
+  res.send('hello world')
+})
+
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT, () => console.log(`Listening on port ${PORT}...`))
+```
+
+## Properties
+
+### app.locals
+
+Looks useless to me
+
+```js
+app.locals.title = 'My App'
+app.locals.strftime = require('strftime')
+app.locals.email = 'me@myapp.com'
+```
+
+### app.mountpath
+
+You don't need it
+
+```js
+var express = require('express')
+
+var app = express() // the main app
+var admin = express() // the sub app
+
+admin.get('/', function (req, res) {
+  console.log(admin.mountpath) // /admin
+  res.send('Admin Homepage')
+})
+
+app.use('/admin', admin)
+```
+
+## Events
+
+### mount
+
+用于子程序
+
+```js
+var admin = express()
+
+admin.on('mount', function (parent) {
+  console.log('Admin Mounted')
+  console.log(parent) // refers to the parent app
+})
+
+admin.get('/', function (req, res) {
+  res.send('Admin Homepage')
+})
+
+app.use('/admin', admin)
+```
+
+## Methods
+
+### app.all()
+
+看着很有用，但是在有相应需求的时候通常使用独立的`middleware`,并配合`app.use(middleware)`
+
+```js
+app.all('/secret', function (req, res, next) {
+  console.log('Accessing the secret section ...')
+  next() // pass control to the next handler
+})
+app.all('*', requireAuthentication, loadUser)
+```
+
+### app.disable() app.disabled() app.enable() app.enabled()
+
+Again, you don't need those methods when you just use express as backend for apis
+
+```js
+app.disable('trust proxy') // equal to app.set('trust proxy', false)
+console.log(app.get('trust proxy')) // false
+
+console.log(app.disabled('trust proxy')) // true
+
+app.enable('trust proxy') // equal to app.set('trust proxy', true)
+console.log(app.get('trust proxy')) // true
+
+console.log(app.enabled('trust proxy')) // true
+```
+
+### app.engine()
+
+如果只是将 `express` 作为处理 `api` 的后端工具，那么基本上不会需要这个。
+
+```js
+app.engine('pug', require('pug').__express)
+app.engine('html', require('ejs').renderFile)
+var engines = require('consolidate')
+app.engine('haml', engines.haml)
+app.engine('html', engines.hogan)
+```
+
+### app.delete()
+
+**增删查改技术上可以乱用，也就是说可以使用`delete`做例如`post`的事情，严格来讲这些方法更像是约定，如同`status`**
+
+```js
+app.delete('/', function (req, res) {
+  res.send('DELETE request to homepage')
+})
+```
+
+### app.get()
+
+#### 用法 1
+
+```js
+app.get('title')
+// => undefined
+
+app.set('title', 'My Site')
+app.get('title')
+// => "My Site"
+```
+
+#### 用法 2
+
+```js
+app.get('/', function (req, res) {
+  res.send('GET request to homepage')
+})
+```
+
+### app.post()
+
+```js
+app.post('/', function (req, res) {
+  res.send('POST request to homepage')
+})
+```
+
+### app.put()
+
+```js
+app.put('/', function (req, res) {
+  res.send('PUT request to homepage')
+})
+```
+
+### app.METHOD()
+
+其他可以使用的方法
+
+- checkout
+- copy
+- delete
+- get
+- head
+- lock
+- merge
+- mkactivity
+- mkcol
+- move
+- m-search
+- notify
+- options
+- patch
+- post
+- purge
+- put
+- report
+- search
+- subscribe
+- trace
+- unlock
+- unsubscribe
+
+### app.listen()
+
+```js
+const express = require('express')
+const app = express()
+
+app.listen(3000)
+```
+
+### app.param()
+
+You don't need it, use `app.use()` instead.
+
+```js
+app.param('user', function (req, res, next, id) {
+  // try to get the user details from the User model and attach it to the request object
+  User.find(id, function (err, user) {
+    if (err) {
+      next(err)
+    } else if (user) {
+      req.user = user
+      next()
+    } else {
+      next(new Error('failed to load user'))
+    }
+  })
+})
+```
+
+### app.path()
+
+Don't use it, `req.baseUrl` is better.
+
+```js
+var app = express()
+var blog = express()
+var blogAdmin = express()
+
+app.use('/blog', blog)
+blog.use('/admin', blogAdmin)
+
+console.dir(app.path()) // ''
+console.dir(blog.path()) // '/blog'
+console.dir(blogAdmin.path()) // '/blog/admin'
+```
+
+### app.render()
+
+Again, you don't need it. btw, this method is for rendering view
+
+```js
+app.render('email', function (err, html) {
+  // ...
+})
+
+app.render('email', { name: 'Tobi' }, function (err, html) {
+  // ...
+})
+```
+
+### app.route()
+
+```js
+var app = express()
+
+app
+  .route('/events')
+  .all(function (req, res, next) {
+    // runs for all HTTP verbs first
+    // think of it as route specific middleware!
+  })
+  .get(function (req, res, next) {
+    res.json({})
+  })
+  .post(function (req, res, next) {
+    // maybe add a new event...
+  })
+```
+
+### app.set()
+
+```js
+app.set('title', 'My Site')
+app.get('title') // "My Site"
+```
+
+### app.use()
+
+用于使用`middleware`,但是一切介于网络请求以及回应之间的都是`middleware`,所以它能做很多事情。
+
+```js
+app.use(function (req, res, next) {
+  console.log('Time: %d', Date.now())
+  next()
+})
+```
