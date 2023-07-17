@@ -1,0 +1,286 @@
+---
+title: Express Response
+date: '2023-07-18'
+tags: ['express', 'Response']
+draft: false
+summary: 'express response'
+---
+
+# Response
+
+## Properties
+
+### res.app
+
+等同于`req.app`
+
+### res.headersSent
+
+Boolean property that indicates if the app sent HTTP headers for the response.
+
+```js
+app.get('/', function (req, res) {
+  console.dir(res.headersSent) // false
+  res.send('OK')
+  console.dir(res.headersSent) // true
+})
+```
+
+### res.locals
+
+用不到的
+
+```js
+app.use(function (req, res, next) {
+  // Make `user` and `authenticated` available in templates
+  res.locals.user = req.user
+  res.locals.authenticated = !req.user.anonymous
+  next()
+})
+```
+
+## Methods
+
+### res.append(field [, value])
+
+```js
+res.append('Link', ['<http://localhost/>', '<http://localhost:3000/>'])
+res.append('Set-Cookie', 'foo=bar; Path=/; HttpOnly')
+res.append('Warning', '199 Miscellaneous warning')
+```
+
+### res.attachment([filename])
+
+```js
+res.attachment()
+// Content-Disposition: attachment
+
+res.attachment('path/to/logo.png')
+// Content-Disposition: attachment; filename="logo.png"
+// Content-Type: image/png
+```
+
+### res.cookie(name, value [, options])
+
+```js
+res
+  .status(201)
+  .cookie('access_token', 'Bearer ' + token, {
+    expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
+  })
+  .cookie('test', 'test')
+  .redirect(301, '/admin')
+```
+
+### res.clearCookie(name [, options])
+
+```js
+res.cookie('name', 'tobi', { path: '/admin' })
+res.clearCookie('name', { path: '/admin' })
+```
+
+### res.download(path [, filename] [, options] [, fn])
+
+```
+res.download('/report-12345.pdf')
+
+res.download('/report-12345.pdf', 'report.pdf')
+
+res.download('/report-12345.pdf', 'report.pdf', function (err) {
+  if (err) {
+    // Handle error, but keep in mind the response may be partially-sent
+    // so check res.headersSent
+  } else {
+    // decrement a download credit, etc.
+  }
+})
+```
+
+### res.end([data] [, encoding])
+
+```js
+res.end()
+res.status(404).end()
+```
+
+### res.format(object)
+
+```js
+res.format({
+  'text/plain': function () {
+    res.send('hey')
+  },
+
+  'text/html': function () {
+    res.send('<p>hey</p>')
+  },
+
+  'application/json': function () {
+    res.send({ message: 'hey' })
+  },
+
+  default: function () {
+    // log the request and respond with 406
+    res.status(406).send('Not Acceptable')
+  },
+})
+```
+
+### res.get(field)
+
+case-insensitive.
+
+```js
+res.get('Content-Type')
+// => "text/plain"
+```
+
+### res.json([body])
+
+```js
+res.json(null)
+res.json({ user: 'tobi' })
+res.status(500).json({ error: 'message' })
+```
+
+### res.jsonp([body])
+
+```js
+res.jsonp(null)
+// => callback(null)
+
+res.jsonp({ user: 'tobi' })
+// => callback({ "user": "tobi" })
+
+res.status(500).jsonp({ error: 'message' })
+// => callback({ "error": "message" })
+```
+
+### res.links(links)
+
+```js
+res.links({
+  next: 'http://api.example.com/users?page=2',
+  last: 'http://api.example.com/users?page=5',
+})
+
+/*
+Link: <http://api.example.com/users?page=2>; rel="next",
+      <http://api.example.com/users?page=5>; rel="last"
+*/
+```
+
+### res.location(path)
+
+```js
+res.location('/foo/bar')
+res.location('http://example.com')
+res.location('back')
+```
+
+### res.redirect([status,] path)
+
+```js
+res.redirect('/foo/bar')
+res.redirect('http://example.com')
+res.redirect(301, 'http://example.com')
+res.redirect('../login')
+```
+
+### res.render(view [, locals] [, callback])
+
+```js
+// send the rendered view to the client
+res.render('index')
+
+// if a callback is specified, the rendered HTML string has to be sent explicitly
+res.render('index', function (err, html) {
+  res.send(html)
+})
+
+// pass a local variable to the view
+res.render('user', { name: 'Tobi' }, function (err, html) {
+  // ...
+})
+```
+
+### res.send([body])
+
+```js
+res.send(Buffer.from('whoop'))
+res.send({ some: 'json' })
+res.send('<p>some html</p>')
+res.status(404).send('Sorry, we cannot find that!')
+res.status(500).send({ error: 'something blew up' })
+```
+
+### res.sendFile(path [, options] [, fn])
+
+```js
+app.get('/file/:name', function (req, res, next) {
+  var options = {
+    root: path.join(__dirname, 'public'),
+    dotfiles: 'deny',
+    headers: {
+      'x-timestamp': Date.now(),
+      'x-sent': true,
+    },
+  }
+
+  var fileName = req.params.name
+  res.sendFile(fileName, options, function (err) {
+    if (err) {
+      next(err)
+    } else {
+      console.log('Sent:', fileName)
+    }
+  })
+})
+```
+
+### res.sendStatus(statusCode)
+
+```js
+res.sendStatus(404)
+```
+
+### res.set(field [, value])
+
+```js
+res.set('Content-Type', 'text/plain')
+
+res.set({
+  'Content-Type': 'text/plain',
+  'Content-Length': '123',
+  ETag: '12345',
+})
+```
+
+### res.status(code)
+
+```js
+res.status(403).end()
+res.status(400).send('Bad Request')
+res.status(404).sendFile('/absolute/path/to/404.png')
+```
+
+### res.type(type)
+
+```js
+res.type('.html')
+// => 'text/html'
+res.type('html')
+// => 'text/html'
+res.type('json')
+// => 'application/json'
+res.type('application/json')
+// => 'application/json'
+res.type('png')
+// => 'image/png'
+```
+
+### res.vary(field)
+
+```js
+res.vary('User-Agent').render('docs')
+```
