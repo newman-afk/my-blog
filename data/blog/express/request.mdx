@@ -1,0 +1,300 @@
+---
+title: Express Request
+date: '2023-07-16'
+tags: ['express', 'request']
+draft: false
+summary: 'express request'
+---
+
+# Request
+
+## Properties
+
+### req.app
+
+Feels useless to me
+
+```js
+function (req, res) {
+  res.send('The views directory is ' + req.app.get('views'))
+}
+```
+
+### req.baseUrl
+
+The URL path on which a router instance was mounted.
+
+```js
+var greet = express.Router()
+
+greet.get('/jp', function (req, res) {
+  console.log(req.baseUrl) // /greet
+  res.send('Konichiwa!')
+})
+
+app.use('/greet', greet) // load the router on '/greet'
+```
+
+### req.body
+
+```js
+var express = require('express')
+
+var app = express()
+
+app.use(express.json()) // for parsing application/json
+app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+
+app.post('/profile', function (req, res, next) {
+  console.log(req.body)
+  res.json(req.body)
+})
+```
+
+### req.cookie
+
+```js
+const express = require('express')
+const cookieParser = require('cookie-parser')
+
+const app = express()
+app.use(cookieParser())
+
+// Cookie: name=tj
+console.dir(req.cookies.name)
+// => 'tj'
+```
+
+### req.fresh
+
+Seem like this property is used for caching,return true or false btw.
+
+### req.hostname
+
+```js
+// Host: "example.com:3000"
+console.dir(req.hostname)
+// => 'example.com'
+```
+
+### req.ip
+
+ip
+
+### req.ips
+
+Looks likt the client needs to set this property
+
+### req.method
+
+Contains a string corresponding to the HTTP method of the request: GET, POST, PUT, and so on.
+I believe you don't need this property
+
+### req.originalUrl
+
+```js
+app.use('/admin', function (req, res, next) {
+  // GET 'http://www.example.com/admin/new?sort=desc'
+  console.dir(req.originalUrl) // '/admin/new?sort=desc'
+  console.dir(req.baseUrl) // '/admin'
+  console.dir(req.path) // '/new'
+  next()
+})
+```
+
+### req.params
+
+Nothing special, but the code below you should probably know that exists
+
+```js
+Route path: /flights/:from-:to
+Request URL: http://localhost:3000/flights/LAX-SFO
+req.params: { "from": "LAX", "to": "SFO" }
+
+Route path: /plantae/:genus.:species
+Request URL: http://localhost:3000/plantae/Prunus.persica
+req.params: { "genus": "Prunus", "species": "persica" }
+```
+
+### req.path
+
+```js
+// example.com/users?sort=desc
+console.dir(req.path)
+// => '/users'
+```
+
+### req.protocol
+
+http or https
+
+### req.query
+
+```js
+// example.com/?sort=desc
+function(req, res) {
+   console.log(req.query) // { "sort": "desc"}
+}
+```
+
+### req.route
+
+Contains the currently-matched route, a string. For example:
+
+```js
+app.get('/user/:id?', function userIdHandler(req, res) {
+  console.log(req.route)
+  res.send('GET')
+})
+
+/*
+{ path: '/user/:id?',
+  stack:
+   [ { handle: [Function: userIdHandler],
+       name: 'userIdHandler',
+       params: undefined,
+       path: undefined,
+       keys: [],
+       regexp: /^\/?$/i,
+       method: 'get' } ],
+  methods: { get: true } }
+*/
+```
+
+### req.secure
+
+A Boolean property that is true if a TLS connection is established. Equivalent to:
+
+```js
+console.dir(req.protocol === 'https')
+// => true
+```
+
+### req.signedCookies
+
+```js
+// Cookie: user=tobi.CP7AWaXDfAKIRfH49dQzKJx7sKzzSoPq7/AcBBRVwlI3
+console.dir(req.signedCookies.user)
+// => 'tobi'
+```
+
+### req.stale
+
+```
+req.stale = !req.fresh
+```
+
+### req.subdomains
+
+```js
+// Host: "tobi.ferrets.example.com"
+console.dir(req.subdomains)
+// => ['ferrets', 'tobi']
+```
+
+### req.xhr
+
+A Boolean property that is true if the request’s X-Requested-With header field is “XMLHttpRequest”, indicating that the request was issued by a client library such as jQuery.
+
+```js
+console.dir(req.xhr)
+// => true
+```
+
+## Methods
+
+### req.accepts()
+
+```js
+// Accept: text/html
+req.accepts('html')
+// => "html"
+
+// Accept: text/*, application/json
+req.accepts('html')
+// => "html"
+req.accepts('text/html')
+// => "text/html"
+req.accepts(['json', 'text'])
+// => "json"
+req.accepts('application/json')
+// => "application/json"
+
+// Accept: text/*, application/json
+req.accepts('image/png')
+req.accepts('png')
+// => false
+
+// Accept: text/*;q=.5, application/json
+req.accepts(['html', 'json'])
+// => "json"
+```
+
+### req.acceptsCharsets(charset [, ...])
+
+Returns the first accepted charset of the specified character sets, based on the request’s Accept-Charset HTTP header field. If none of the specified charsets is accepted, returns false.
+
+### req.acceptsEncodings(encoding [, ...])
+
+Returns the first accepted encoding of the specified encodings, based on the request’s Accept-Encoding HTTP header field. If none of the specified encodings is accepted, returns false.
+
+### req.acceptsLanguages(lang [, ...])
+
+Returns the first accepted language of the specified languages, based on the request’s Accept-Language HTTP header field. If none of the specified languages is accepted, returns false.
+
+### req.get(field)
+
+Returns the specified HTTP request header field (case-insensitive match). The Referrer and Referer fields are interchangeable.
+
+```js
+req.get('Content-Type')
+// => "text/plain"
+
+req.get('content-type')
+// => "text/plain"
+
+req.get('Something')
+// => undefined
+```
+
+### req.is(type)
+
+```js
+// With Content-Type: text/html; charset=utf-8
+req.is('html')
+// => 'html'
+req.is('text/html')
+// => 'text/html'
+req.is('text/*')
+// => 'text/*'
+
+// When Content-Type is application/json
+req.is('json')
+// => 'json'
+req.is('application/json')
+// => 'application/json'
+req.is('application/*')
+// => 'application/*'
+
+req.is('html')
+// => false
+```
+
+### req.param(name [, defaultValue])
+
+已弃用
+
+### req.range(size[, options])
+
+```js
+// parse header from request
+var range = req.range(1000)
+
+// the type of the range
+if (range.type === 'bytes') {
+  // the ranges
+  range.forEach(function (r) {
+    // do something with r.start and r.end
+  })
+}
+```
