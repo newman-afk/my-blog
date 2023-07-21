@@ -1,0 +1,172 @@
+---
+title: mongoDB
+date: '2023-07-19'
+tags: ['mongoDB', 'database']
+draft: false
+summary: For the next generation of intelligent applications.
+---
+
+# mongoDB
+
+如果`connection url`为`mongodb://localhost:27017/`请改为`mongodb://127.0.0.1:27017/`, 但若是在连接时没有遇到 bug 就不用了。详情请见：[stackoverflow](https://stackoverflow.com/questions/74826965/mongoserverselectionerror-connect-econnrefused-127017)
+
+## 增删查改 CRUD
+
+`mongoDB` 会自动添加`_id`
+
+## 增加
+
+### insertOne()
+
+```js
+await db.collection('inventory').insertOne({
+  item: 'canvas',
+  qty: 100,
+  tags: ['cotton'],
+  size: { h: 28, w: 35.5, uom: 'cm' },
+})
+```
+
+### insertMany()
+
+```js
+await db.collection('inventory').insertMany([
+  {
+    item: 'journal',
+    qty: 25,
+    tags: ['blank', 'red'],
+    size: { h: 14, w: 21, uom: 'cm' },
+  },
+  {
+    item: 'mat',
+    qty: 85,
+    tags: ['gray'],
+    size: { h: 27.9, w: 35.5, uom: 'cm' },
+  },
+  {
+    item: 'mousepad',
+    qty: 25,
+    tags: ['gel', 'blue'],
+    size: { h: 19, w: 22.85, uom: 'cm' },
+  },
+])
+```
+
+### Additional Methods for Inserts
+
+- `db.collection.updateOne()` when used with the upsert: true option.
+- `db.collection.updateMany()` when used with the upsert: true option.
+- `db.collection.findAndModify()` when used with the upsert: true option.
+- `db.collection.findOneAndUpdate()` when used with the upsert: true option.
+- `db.collection.findOneAndReplace()` when used with the upsert: true option.
+- `db.collection.bulkWrite()`.
+
+## 查询
+
+元素顺序是很重要的
+
+`find()`
+
+- `{}` 全部
+- `{ status: "D" }` 精准搜索
+- `{ status: { $in: [ "A", "D" ] } }` status 为 A 或者 D
+- `{ status: "A", qty: { $lt: 30 } }` lt means less than
+- `{ status: "A", $or: [ { qty: { $lt: 30 } }, { item: /^p/ } ] }` 与或结合
+
+### 嵌套 object
+
+`db.inventory.find({ size:{ uom: "in" }})`等价于`db.inventory.find({ "size.uom": "in" } )`
+
+更多示例：
+
+- `db.inventory.find( { "size.h": { $lt: 15 } } )`
+- `db.inventory.find( { "size.h": { $lt: 15 }, "size.uom": "in", status: "D" } )`
+
+### Array
+
+`{ item: "journal", qty: 25, tags: ["blank", "red"], dim_cm: [ 14, 21 ] }`
+
+- `db.inventory.find( { tags: ["red", "blank"] } )` 精准搜索
+- `db.inventory.find( { tags: { $all: ["red", "blank"] } } )` 无视顺序
+- `db.inventory.find( { tags: "red" } )` Array 中有`red`就匹配
+- `db.inventory.find( { dim_cm: { $gt: 25 } } )` 任意数大于 25 则匹配
+- `db.inventory.find( { dim_cm: { $gt: 15, $lt: 20 } } )` 每一个条件能被任意元素符合则匹配
+- `db.inventory.find( { dim_cm: { $elemMatch: { $gt: 22, $lt: 30 } } } )` 必须有单一元素完全符合才匹配
+- `db.inventory.find( { "dim_cm.1": { $gt: 25 } } )` `.1`指明了`index`为 1 也就是第二个元素
+- `db.inventory.find( { "tags": { $size: 3 } } )` 搜索具体的`Array.length`
+
+### Object Array
+
+`{ item: "journal", instock: [ { warehouse: "A", qty: 5 }, { warehouse: "C", qty: 15 } ] }`
+
+- `db.inventory.find( { "instock": { warehouse: "A", qty: 5 } } )` 精准搜索
+- `db.inventory.find( { 'instock.qty': { $lte: 20 } } )` 类似 Array, 无视顺序
+- `db.inventory.find( { 'instock.0.qty': { $lte: 20 } } )`
+- `db.inventory.find( { "instock": { $elemMatch: { qty: 5, warehouse: "A" } } } )` 无视顺序
+- `db.inventory.find( { "instock": { $elemMatch: { qty: { $gt: 10, $lte: 20 } } } } )`
+- `db.inventory.find( { "instock.qty": { $gt: 10,  $lte: 20 } } )` 每一个条件能被任意元素符合则匹配
+- `db.inventory.find( { "instock.qty": 5, "instock.warehouse": "A" } )` 同上
+
+### 限制返回数据
+
+**With the exception of the \_id field, you cannot combine inclusion and exclusion statements in projection documents.**
+
+- `db.inventory.find( { status: "A" }, { item: 1, status: 1 } )` 只返回 item 与 status and \_id
+- `db.inventory.find( { status: "A" }, { item: 1, status: 1, _id: 0 } )` 不返回 id
+- `db.inventory.find( { status: "A" }, { status: 0, instock: 0 } )` 排除法
+- `db.inventory.find({ status: "A" }, { item: 1, status: 1, "size.uom": 1 })`
+- `db.inventory.find( { status: "A" }, { item: 1, status: 1, instock: { $slice: -1 } } )` 返回 instock 最后一个元素
+
+  `{ "instock.0": 1 }` 不行
+
+### Query for Null or Missing Fields
+
+`{item:null}`将匹配完全没有该 item 的元素
+`db.inventory.find( { item : { $exists: false } } )`
+
+## 更新
+
+` { item: "canvas", qty: 100, size: { h: 28, w: 35.5, uom: "cm" }, status: "A" }`
+
+- `$$NOW` 当前时间
+- `$set` 更新或创建
+- `$currentDate` 更新或创建
+
+```js
+db.inventory.updateOne(
+  { item: 'paper' },
+  {
+    $set: { 'size.uom': 'cm', status: 'P' },
+    $currentDate: { lastModified: true },
+  }
+)
+```
+
+```js
+db.inventory.updateMany(
+  { qty: { $lt: 50 } },
+  {
+    $set: { 'size.uom': 'in', status: 'P' },
+    $currentDate: { lastModified: true },
+  }
+)
+```
+
+```js
+db.inventory.replaceOne(
+  { item: 'paper' },
+  {
+    item: 'paper',
+    instock: [
+      { warehouse: 'A', qty: 60 },
+      { warehouse: 'B', qty: 40 },
+    ],
+  }
+)
+```
+
+## 删除
+
+- `await db.collection('inventory').deleteOne({ status: 'D' })`
+- `await db.collection('inventory').deleteMany({})`
+- `await db.collection('inventory').deleteMany({ status: 'A' })`
