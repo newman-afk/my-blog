@@ -1,19 +1,15 @@
 const projectsData = [
   {
-    title: 'A Search Engine',
-    description: `What if you could look up any information in the world? Webpages, images, videos
-    and more. Google has many features to help you find exactly what you're looking
-    for.`,
-    imgSrc: '/static/images/google.png',
-    href: 'https://www.google.com',
+    title: 'QR-Code 生成网',
+    description: `QR-Code 在线生成, 丰富的参数可供选择，并提供多种文件类型下载。`,
+    imgSrc: '/static/images/qrcode.png',
+    href: 'https://rust-qrcode.netlify.app/',
   },
   {
-    title: 'The Time Machine',
-    description: `Imagine being able to travel back in time or to the future. Simple turn the knob
-    to the desired date and press "Go". No more worrying about lost keys or
-    forgotten headphones with this simple yet affordable solution.`,
-    imgSrc: '/static/images/time-machine.jpg',
-    href: '/blog/the-time-machine',
+    title: 'CodePen Clone',
+    description: `CodePen Clone, 提供前端基本三大件编辑功能，并提供实时结果显示。`,
+    imgSrc: '/static/images/codepen-clone.png',
+    href: 'https://rust-codepen-clone.netlify.app/',
   },
 ]
 
